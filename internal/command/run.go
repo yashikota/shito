@@ -7,7 +7,7 @@ import (
 	"io"
 	"log/slog"
 
-	"github.com/yashikota/shito/internal/codex"
+	"github.com/yashikota/shito/internal/acp"
 	"github.com/yashikota/shito/internal/config"
 	"github.com/yashikota/shito/internal/orchestrator"
 	"github.com/yashikota/shito/internal/slack"
@@ -70,14 +70,12 @@ func Run(ctx context.Context, args []string, opts Options) error {
 		return err
 	}
 
-	codingAgent, err := codex.New(ctx, codex.Config{
-		Command:        cfg.Agent.Command,
-		CWD:            cfg.Agent.CWD,
-		Model:          cfg.Agent.Model,
-		Effort:         cfg.Agent.Effort,
-		ApprovalPolicy: cfg.Agent.ApprovalPolicy,
-		SandboxPolicy:  cfg.Agent.SandboxPolicy,
-		ServiceName:    cfg.Agent.ServiceName,
+	codingAgent, err := acp.New(ctx, acp.Config{
+		Command: cfg.Agent.Command,
+		CWD:     cfg.Agent.CWD,
+		Model:   cfg.Agent.Model,
+		Effort:  cfg.Agent.Effort,
+		Version: opts.Version,
 	}, opts.Logger)
 	if err != nil {
 		return err

@@ -16,17 +16,17 @@
     "model": {
       "type": "string",
       "minLength": 1,
-      "description": "Codex model name."
+      "description": "Model name passed to the agent via environment variable."
     },
     "effort": {
       "type": "string",
       "enum": ["low", "medium", "high"],
-      "description": "Codex reasoning effort."
+      "description": "Reasoning effort level passed to the agent."
     },
     "path": {
       "type": "string",
       "minLength": 1,
-      "description": "Working directory for Codex and command execution. Supports ~/."
+      "description": "Working directory for the agent and command execution. Supports ~/."
     }
   }
 }

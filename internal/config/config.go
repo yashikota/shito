@@ -29,14 +29,11 @@ type SlackConfig struct {
 }
 
 type AgentConfig struct {
-	Type           string          `json:"type"`
-	Command        []string        `json:"command"`
-	CWD            string          `json:"cwd"`
-	Model          string          `json:"model"`
-	Effort         string          `json:"effort"`
-	ApprovalPolicy string          `json:"approvalPolicy"`
-	SandboxPolicy  json.RawMessage `json:"sandboxPolicy"`
-	ServiceName    string          `json:"serviceName"`
+	Type    string   `json:"type"`
+	Command []string `json:"command"`
+	CWD     string   `json:"cwd"`
+	Model   string   `json:"model"`
+	Effort  string   `json:"effort"`
 }
 
 type StoreConfig struct {
@@ -76,7 +73,6 @@ func Load(path string) (Config, error) {
 	if cfg.Orchestrator.UpdateEvery == 0 {
 		cfg.Orchestrator.UpdateEvery = 2 * time.Second
 	}
-	cfg.Agent.ApprovalPolicy = normalizeApprovalPolicy(cfg.Agent.ApprovalPolicy)
 	return cfg, cfg.Validate()
 }
 
@@ -85,10 +81,8 @@ func Defaults() Config {
 	statePath := filepath.Join(home, ".local", "state", "shito", "state.json")
 	return Config{
 		Agent: AgentConfig{
-			Type:           "codex",
-			Command:        []string{"codex", "app-server"},
-			ApprovalPolicy: "on-request",
-			ServiceName:    "shito",
+			Type:    "acp",
+			Command: []string{"codex", "app-server"},
 		},
 		Store: StoreConfig{Path: statePath},
 		Orchestrator: OrchestratorConfig{
@@ -122,7 +116,7 @@ func (c Config) Validate() error {
 	if len(c.Slack.ChannelIDs) == 0 {
 		return errors.New("at least one slack channel id is required")
 	}
-	if c.Agent.Type != "codex" {
+	if c.Agent.Type != "acp" {
 		return fmt.Errorf("unsupported agent type: %s", c.Agent.Type)
 	}
 	if len(c.Agent.Command) == 0 {
@@ -147,21 +141,15 @@ func applyEnv(cfg *Config) {
 	if v := os.Getenv("SHITO_STORE_PATH"); v != "" {
 		cfg.Store.Path = v
 	}
-	if v := os.Getenv("SHITO_CODEX_COMMAND"); v != "" {
+	if v := os.Getenv("SHITO_AGENT_COMMAND"); v != "" {
 		cfg.Agent.Command = strings.Fields(v)
 	}
-	if v := os.Getenv("SHITO_CODEX_CWD"); v != "" {
+	if v := os.Getenv("SHITO_AGENT_CWD"); v != "" {
 		cfg.Agent.CWD = v
-	}
-	if v := os.Getenv("SHITO_CODEX_MODEL"); v != "" {
-		cfg.Agent.Model = v
 	}
 	if v := os.Getenv("SHITO_MODEL"); v != "" {
 		cfg.Model = v
 		cfg.Agent.Model = v
-	}
-	if v := os.Getenv("SHITO_CODEX_EFFORT"); v != "" {
-		cfg.Agent.Effort = v
 	}
 	if v := os.Getenv("SHITO_EFFORT"); v != "" {
 		cfg.Effort = v
@@ -191,17 +179,6 @@ func splitCSV(v string) []string {
 		}
 	}
 	return out
-}
-
-func normalizeApprovalPolicy(v string) string {
-	switch v {
-	case "unlessTrusted", "onRequest":
-		return "on-request"
-	case "onFailure":
-		return "on-failure"
-	default:
-		return v
-	}
 }
 
 func expandHome(path string) string {

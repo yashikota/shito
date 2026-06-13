@@ -10,8 +10,7 @@ func TestLoadReadsEnvOverrides(t *testing.T) {
 	t.Setenv("SLACK_BOT_TOKEN", "xoxb-test")
 	t.Setenv("SHITO_SLACK_CHANNEL_IDS", "C1, C2")
 	t.Setenv("SHITO_STORE_PATH", "/tmp/shito-test.json")
-	t.Setenv("SHITO_CODEX_MODEL", "gpt-test")
-	t.Setenv("SHITO_MODEL", "")
+	t.Setenv("SHITO_MODEL", "gpt-test")
 	t.Setenv("SHITO_MAX_CONCURRENT", "3")
 	t.Setenv("SHITO_LANG", "en")
 
@@ -41,7 +40,6 @@ func TestLoadReadsJSONConfig(t *testing.T) {
 	t.Setenv("SLACK_BOT_TOKEN", "")
 	t.Setenv("SHITO_SLACK_CHANNEL_IDS", "")
 	t.Setenv("SHITO_STORE_PATH", "")
-	t.Setenv("SHITO_CODEX_MODEL", "")
 	t.Setenv("SHITO_MODEL", "")
 	t.Setenv("SHITO_MAX_CONCURRENT", "")
 
@@ -54,7 +52,7 @@ func TestLoadReadsJSONConfig(t *testing.T) {
 		},
 		"store": { "path": "/tmp/shito-json.json" },
 		"agent": {
-			"type": "codex",
+			"type": "acp",
 			"command": ["codex", "app-server"],
 			"model": "gpt-json"
 		},
@@ -92,7 +90,7 @@ func TestLoadAppliesTopLevelModel(t *testing.T) {
 		"lang": "ja",
 		"model": "gpt-5.5",
 		"agent": {
-			"type": "codex",
+			"type": "acp",
 			"command": ["codex", "app-server"],
 			"model": "gpt-agent"
 		}
@@ -124,7 +122,7 @@ func TestLoadAppliesTopLevelEffort(t *testing.T) {
 	body := `{
 		"effort": "medium",
 		"agent": {
-			"type": "codex",
+			"type": "acp",
 			"command": ["codex", "app-server"],
 			"effort": "low"
 		}
@@ -158,7 +156,7 @@ func TestLoadAppliesTopLevelPath(t *testing.T) {
 	body := `{
 		"path": "~/prj",
 		"agent": {
-			"type": "codex",
+			"type": "acp",
 			"command": ["codex", "app-server"],
 			"cwd": "/tmp/agent-cwd"
 		}
@@ -189,7 +187,7 @@ func TestLoadEnvModelOverridesTopLevelModel(t *testing.T) {
 	body := `{
 		"model": "gpt-5.5",
 		"agent": {
-			"type": "codex",
+			"type": "acp",
 			"command": ["codex", "app-server"]
 		}
 	}`
@@ -218,7 +216,7 @@ func TestLoadEnvEffortOverridesTopLevel(t *testing.T) {
 	body := `{
 		"effort": "medium",
 		"agent": {
-			"type": "codex",
+			"type": "acp",
 			"command": ["codex", "app-server"]
 		}
 	}`
@@ -247,7 +245,7 @@ func TestLoadEnvPathOverridesTopLevelPath(t *testing.T) {
 	body := `{
 		"path": "/tmp/config-path",
 		"agent": {
-			"type": "codex",
+			"type": "acp",
 			"command": ["codex", "app-server"]
 		}
 	}`
@@ -266,27 +264,3 @@ func TestLoadEnvPathOverridesTopLevelPath(t *testing.T) {
 	}
 }
 
-func TestLoadNormalizesLegacyApprovalPolicy(t *testing.T) {
-	t.Setenv("SLACK_APP_TOKEN", "xapp-test")
-	t.Setenv("SLACK_BOT_TOKEN", "xoxb-test")
-	t.Setenv("SHITO_SLACK_CHANNEL_IDS", "C1")
-
-	path := t.TempDir() + "/config.json"
-	body := `{
-		"agent": {
-			"type": "codex",
-			"command": ["codex", "app-server"],
-			"approvalPolicy": "unlessTrusted"
-		}
-	}`
-	if err := os.WriteFile(path, []byte(body), 0o600); err != nil {
-		t.Fatal(err)
-	}
-	cfg, err := Load(path)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if cfg.Agent.ApprovalPolicy != "on-request" {
-		t.Fatalf("approval policy = %q, want on-request", cfg.Agent.ApprovalPolicy)
-	}
-}

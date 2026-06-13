@@ -45,6 +45,11 @@ tasks:
       - task: lint
       - task: vet
 
+  logs:
+    desc: Show shito process logs
+    cmds:
+      - process-compose process logs shito
+
   stop:
     desc: Stop shito
     cmds:

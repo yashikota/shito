@@ -82,7 +82,7 @@ func Defaults() Config {
 	return Config{
 		Agent: AgentConfig{
 			Type:    "acp",
-			Command: []string{"codex", "app-server"},
+			Command: []string{"codex-acp"},
 		},
 		Store: StoreConfig{Path: statePath},
 		Orchestrator: OrchestratorConfig{

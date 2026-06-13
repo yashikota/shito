@@ -53,7 +53,7 @@ func TestLoadReadsJSONConfig(t *testing.T) {
 		"store": { "path": "/tmp/shito-json.json" },
 		"agent": {
 			"type": "acp",
-			"command": ["codex", "app-server"],
+			"command": ["codex-acp"],
 			"model": "gpt-json"
 		},
 		"orchestrator": {
@@ -91,7 +91,7 @@ func TestLoadAppliesTopLevelModel(t *testing.T) {
 		"model": "gpt-5.5",
 		"agent": {
 			"type": "acp",
-			"command": ["codex", "app-server"],
+			"command": ["codex-acp"],
 			"model": "gpt-agent"
 		}
 	}`
@@ -123,7 +123,7 @@ func TestLoadAppliesTopLevelEffort(t *testing.T) {
 		"effort": "medium",
 		"agent": {
 			"type": "acp",
-			"command": ["codex", "app-server"],
+			"command": ["codex-acp"],
 			"effort": "low"
 		}
 	}`
@@ -157,7 +157,7 @@ func TestLoadAppliesTopLevelPath(t *testing.T) {
 		"path": "~/prj",
 		"agent": {
 			"type": "acp",
-			"command": ["codex", "app-server"],
+			"command": ["codex-acp"],
 			"cwd": "/tmp/agent-cwd"
 		}
 	}`
@@ -188,7 +188,7 @@ func TestLoadEnvModelOverridesTopLevelModel(t *testing.T) {
 		"model": "gpt-5.5",
 		"agent": {
 			"type": "acp",
-			"command": ["codex", "app-server"]
+			"command": ["codex-acp"]
 		}
 	}`
 	if err := os.WriteFile(path, []byte(body), 0o600); err != nil {
@@ -217,7 +217,7 @@ func TestLoadEnvEffortOverridesTopLevel(t *testing.T) {
 		"effort": "medium",
 		"agent": {
 			"type": "acp",
-			"command": ["codex", "app-server"]
+			"command": ["codex-acp"]
 		}
 	}`
 	if err := os.WriteFile(path, []byte(body), 0o600); err != nil {
@@ -246,7 +246,7 @@ func TestLoadEnvPathOverridesTopLevelPath(t *testing.T) {
 		"path": "/tmp/config-path",
 		"agent": {
 			"type": "acp",
-			"command": ["codex", "app-server"]
+			"command": ["codex-acp"]
 		}
 	}`
 	if err := os.WriteFile(path, []byte(body), 0o600); err != nil {

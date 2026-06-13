@@ -1,0 +1,46 @@
+version: "3"
+
+silent: true
+
+dotenv:
+  - .env
+
+tasks:
+  default:
+    desc: Show available tasks
+    cmds:
+      - task --list
+    silent: true
+
+  run:
+    desc: Run shito
+    cmds:
+      - go run . {{.ARGS}} {{.CLI_ARGS}}
+
+  test:
+    desc: Run tests
+    cmds:
+      - go test ./...
+
+  lint:
+    desc: Run golangci-lint
+    cmds:
+      - golangci-lint run ./...
+
+  vet:
+    desc: Run go vet
+    cmds:
+      - go vet ./...
+
+  fmt:
+    desc: Format code
+    cmds:
+      - golangci-lint fmt ./...
+
+  check:
+    desc: Format, test, lint, and vet
+    cmds:
+      - task: fmt
+      - task: test
+      - task: lint
+      - task: vet

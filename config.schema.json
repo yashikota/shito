@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/yashikota/shito/config.schema.json",
+  "title": "shito config",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "lang": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Default language hint passed to the agent, for example ja or en."
+    },
+    "model": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Codex model name."
+    },
+    "effort": {
+      "type": "string",
+      "enum": ["low", "medium", "high"],
+      "description": "Codex reasoning effort."
+    },
+    "path": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Working directory for Codex and command execution. Supports ~/."
+    }
+  }
+}

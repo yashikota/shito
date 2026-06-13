@@ -1,0 +1,7 @@
+{
+  "$schema": "./config.schema.json",
+  "lang": "ja",
+  "model": "gpt-5.5",
+  "effort": "medium",
+  "path": "~/prj"
+}

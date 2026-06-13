@@ -1,0 +1,4 @@
+interface:
+  display_name: "Go CLI Builder"
+  short_description: "Build production Go CLI tools"
+  default_prompt: "Use $go-cli-builder to create or update a production-ready Go CLI tool."

@@ -258,11 +258,13 @@ func (a *Agent) Close() error {
 		return nil
 	}
 	a.closed = true
-	for _, ch := range a.pending {
+	for id, ch := range a.pending {
 		close(ch)
+		delete(a.pending, id)
 	}
-	for _, ch := range a.sessions {
+	for id, ch := range a.sessions {
 		close(ch)
+		delete(a.sessions, id)
 	}
 	a.mu.Unlock()
 	return nil
@@ -405,8 +407,8 @@ func (a *Agent) handleNotification(method string, params json.RawMessage) {
 
 func (a *Agent) sendSessionEvent(sessionID string, event agent.Event) {
 	a.mu.Lock()
+	defer a.mu.Unlock()
 	ch := a.sessions[sessionID]
-	a.mu.Unlock()
 	if ch == nil {
 		return
 	}

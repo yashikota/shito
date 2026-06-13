@@ -26,7 +26,7 @@ func TestNew_InitializesViaACP(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer a.Close()
+	defer func() { _ = a.Close() }()
 }
 
 func TestStartSession(t *testing.T) {
@@ -41,7 +41,7 @@ func TestStartSession(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer a.Close()
+	defer func() { _ = a.Close() }()
 
 	sess, err := a.StartSession(ctx, agent.StartSessionRequest{CWD: "/tmp"})
 	if err != nil {
@@ -64,7 +64,7 @@ func TestSendTurn_StreamsAndCompletes(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer a.Close()
+	defer func() { _ = a.Close() }()
 
 	sess, err := a.StartSession(ctx, agent.StartSessionRequest{})
 	if err != nil {
@@ -111,7 +111,7 @@ func TestResumeSession_Loaded(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer a.Close()
+	defer func() { _ = a.Close() }()
 
 	sess, err := a.StartSession(ctx, agent.StartSessionRequest{})
 	if err != nil {
@@ -139,7 +139,7 @@ func TestInterrupt(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer a.Close()
+	defer func() { _ = a.Close() }()
 
 	err = a.Interrupt(ctx, "sess_test123")
 	if err != nil {

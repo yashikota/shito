@@ -1,0 +1,12 @@
+version: "0.5"
+
+environment:
+  - PATH=/home/kota/.local/share/aquaproj-aqua/bin:/home/kota/go/bin:/usr/local/go/bin:/home/kota/.cargo/bin:/home/kota/.local/bin:/usr/local/bin:/usr/bin:/bin
+
+processes:
+  shito:
+    command: ./shito -config config.json
+    env_file: .env
+    availability:
+      restart: on_failure
+      backoff_seconds: 5

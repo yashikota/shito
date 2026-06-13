@@ -44,3 +44,22 @@ tasks:
       - task: test
       - task: lint
       - task: vet
+
+  stop:
+    desc: Stop shito
+    cmds:
+      - process-compose down
+
+  status:
+    desc: Show shito process status
+    cmds:
+      - process-compose process get shito
+
+  start:
+    desc: Build and start shito with process-compose
+    cmds:
+      - |
+        set -eu
+        go build -trimpath -o ./shito .
+        process-compose down 2>/dev/null || true
+        process-compose up -D -t=false

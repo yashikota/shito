@@ -294,6 +294,9 @@ func (o *Orchestrator) streamToChat(ctx context.Context, sent chat.SentMessage, 
 				if event.Err != nil {
 					errText = errText + ": " + event.Err.Error()
 				}
+				if isRateLimitError(event.Err) {
+					errText += "\n\nhttps://chatgpt.com/codex/cloud/settings/analytics#usage"
+				}
 				if err := o.chat.Update(ctx, chat.UpdateMessage{ChannelID: sent.ChannelID, Timestamp: sent.Timestamp, Text: errText}); err != nil {
 					return err
 				}
@@ -301,6 +304,18 @@ func (o *Orchestrator) streamToChat(ctx context.Context, sent chat.SentMessage, 
 			}
 		}
 	}
+}
+
+func isRateLimitError(err error) bool {
+	if err == nil {
+		return false
+	}
+	msg := strings.ToLower(err.Error())
+	return strings.Contains(msg, "out of credits") ||
+		strings.Contains(msg, "rate limit") ||
+		strings.Contains(msg, "quota") ||
+		strings.Contains(msg, "billing") ||
+		strings.Contains(msg, "exceeded")
 }
 
 func extractCommandBlock(text string) (string, bool) {

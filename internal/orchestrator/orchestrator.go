@@ -106,6 +106,7 @@ func (o *Orchestrator) processMessage(ctx context.Context, msg chat.InboundMessa
 		TeamID:       msg.TeamID,
 		ChannelID:    msg.ChannelID,
 		ThreadID:     msg.ThreadID,
+		MessageID:    messageSessionID(msg),
 	}
 	conv, err := o.store.GetOrCreateConversation(ctx, key)
 	if err != nil {
@@ -143,6 +144,16 @@ func (o *Orchestrator) processMessage(ctx context.Context, msg chat.InboundMessa
 	}
 
 	return o.streamToChat(ctx, sent, events)
+}
+
+func messageSessionID(msg chat.InboundMessage) string {
+	if id := strings.TrimSpace(msg.Timestamp); id != "" {
+		return id
+	}
+	if id := strings.TrimSpace(msg.ID); id != "" {
+		return id
+	}
+	return strings.TrimSpace(msg.ThreadID)
 }
 
 func (o *Orchestrator) applyLang(text string) string {

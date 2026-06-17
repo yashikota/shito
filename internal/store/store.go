@@ -7,6 +7,7 @@ type ConversationKey struct {
 	TeamID       string `json:"teamId"`
 	ChannelID    string `json:"channelId"`
 	ThreadID     string `json:"threadId"`
+	MessageID    string `json:"messageId,omitempty"`
 }
 
 type Conversation struct {

@@ -242,7 +242,7 @@ func (a *Adapter) toInboundMessage(payload json.RawMessage, fallbackID string) (
 		threadID = p.Event.TS
 	}
 	return chat.InboundMessage{
-		ID:        p.EventID,
+		ID:        slackMessageID(p.TeamID, p.Event.Channel, p.Event.TS, p.EventID),
 		Provider:  "slack",
 		TeamID:    p.TeamID,
 		ChannelID: p.Event.Channel,
@@ -251,6 +251,13 @@ func (a *Adapter) toInboundMessage(payload json.RawMessage, fallbackID string) (
 		Text:      p.Event.Text,
 		Timestamp: p.Event.TS,
 	}, true, nil
+}
+
+func slackMessageID(teamID, channelID, timestamp, fallbackID string) string {
+	if teamID == "" || channelID == "" || timestamp == "" {
+		return fallbackID
+	}
+	return strings.Join([]string{"slack", teamID, channelID, timestamp}, ":")
 }
 
 func (a *Adapter) toInboundSlashCommand(payload json.RawMessage, fallbackID string) (chat.InboundMessage, bool, error) {

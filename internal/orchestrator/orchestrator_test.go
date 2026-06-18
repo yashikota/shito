@@ -103,6 +103,56 @@ func TestHandleMessageDeduplicatesEvents(t *testing.T) {
 	}
 }
 
+func TestHandleMessageStartsIndependentSessionsPerSlackMessage(t *testing.T) {
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	ch := &fakeChat{}
+	ag := &fakeAgent{events: []agent.Event{{Type: agent.EventCompleted, Text: "done"}}}
+	st := newMemoryStore()
+	orch := New(Config{MaxConcurrent: 1, UpdateEvery: time.Millisecond}, nil, ch, ag, st)
+
+	first := chat.InboundMessage{
+		ID:        "evt-1",
+		Provider:  "slack",
+		TeamID:    "T1",
+		ChannelID: "C1",
+		ThreadID:  "100.1",
+		Timestamp: "100.1",
+		Text:      "first",
+	}
+	second := chat.InboundMessage{
+		ID:        "evt-2",
+		Provider:  "slack",
+		TeamID:    "T1",
+		ChannelID: "C1",
+		ThreadID:  "100.1",
+		Timestamp: "100.2",
+		Text:      "second",
+	}
+
+	if err := orch.HandleMessage(ctx, first); err != nil {
+		t.Fatal(err)
+	}
+	if err := orch.HandleMessage(ctx, second); err != nil {
+		t.Fatal(err)
+	}
+
+	waitFor(t, ctx, func() bool {
+		ag.mu.Lock()
+		defer ag.mu.Unlock()
+		return ag.turns == 2
+	})
+	ag.mu.Lock()
+	defer ag.mu.Unlock()
+	if ag.started != 2 {
+		t.Fatalf("started sessions = %d, want 2", ag.started)
+	}
+	if ag.resumed != 0 {
+		t.Fatalf("resumed sessions = %d, want 0", ag.resumed)
+	}
+}
+
 func TestHandleMessageRunsCommandBlock(t *testing.T) {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
@@ -349,6 +399,7 @@ func (f *fakeChat) Update(_ context.Context, msg chat.UpdateMessage) error {
 type fakeAgent struct {
 	mu            sync.Mutex
 	started       int
+	resumed       int
 	turns         int
 	lastInput     string
 	events        []agent.Event
@@ -363,6 +414,9 @@ func (f *fakeAgent) StartSession(context.Context, agent.StartSessionRequest) (ag
 }
 
 func (f *fakeAgent) ResumeSession(context.Context, string) (agent.Session, error) {
+	f.mu.Lock()
+	defer f.mu.Unlock()
+	f.resumed++
 	return agent.Session{ID: "agent-thread-1"}, nil
 }
 
@@ -407,7 +461,7 @@ func newMemoryStore() *memoryStore {
 func (m *memoryStore) GetOrCreateConversation(_ context.Context, key store.ConversationKey) (store.Conversation, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	id := key.ChannelID + "/" + key.ThreadID
+	id := key.ChannelID + "/" + key.ThreadID + "/" + key.MessageID
 	if c, ok := m.conv[id]; ok {
 		return c, nil
 	}
@@ -419,7 +473,7 @@ func (m *memoryStore) GetOrCreateConversation(_ context.Context, key store.Conve
 func (m *memoryStore) UpdateAgentSession(_ context.Context, key store.ConversationKey, sessionID string) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	id := key.ChannelID + "/" + key.ThreadID
+	id := key.ChannelID + "/" + key.ThreadID + "/" + key.MessageID
 	c, ok := m.conv[id]
 	if !ok {
 		return errors.New("missing conversation")

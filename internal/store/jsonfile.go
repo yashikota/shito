@@ -140,5 +140,9 @@ func (s *JSONFileStore) saveLocked() error {
 }
 
 func keyString(key ConversationKey) string {
-	return strings.Join([]string{key.ChatProvider, key.TeamID, key.ChannelID, key.ThreadID, key.MessageID}, "\x00")
+	parts := []string{key.ChatProvider, key.TeamID, key.ChannelID, key.ThreadID}
+	if key.MessageID != "" {
+		parts = append(parts, key.MessageID)
+	}
+	return strings.Join(parts, "\x00")
 }
